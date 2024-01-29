@@ -26,6 +26,8 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import plotly.graph_objects as go
 import os
+from labsonar_synthesis.scenario.ship import Ship
+from labsonar_synthesis.scenario.hydrophone import Hydrophone
 
 
 class ScenarioController:

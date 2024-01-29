@@ -1,45 +1,53 @@
-import unittest
-import labsonar_synthesis.scenario.scenario_controller as scenarioController
-import labsonar_synthesis.scenario.hydrophone as hydro
-import labsonar_synthesis.scenario.ship as ships
+"""Naval and Underwater Scenario Simulation Program
+
+This program utilizes the ScenarioController module to simulate and visualize naval and underwater scenarios.
+It includes the addition and movement simulation of various objects like ships and hydrophones in a predefined environment.
+
+"""
+import random
+from labsonar_synthesis.scenario.scenario_controller import ScenarioController
+from labsonar_synthesis.scenario.ship import Ship
+from labsonar_synthesis.scenario.hydrophone import Hydrophone
 
 
+def create_random_position(dimension):
+    """Generate a random position in the scenario."""
+    return tuple(random.uniform(0, 100) for _ in range(dimension))
 
-class TestScenarioController(unittest.TestCase):
 
-    def setUp(self):
-        # Inicialização básica para os testes
-        self.scenario = scenarioController.ScenarioController(dimension=3)
-        self.ship = ships.Ship(position=(0, 0, 0))
-        self.hydrophone = hydro.Hydrophone(position=(100, 100, -10))
+def main():
+    """Main function for the naval and underwater scenario simulation program."""
 
-    def test_add_object(self):
-        # Teste para adicionar objetos ao cenário
-        self.scenario.add_object(self.ship)
-        self.scenario.add_object(self.hydrophone)
-        self.assertIn(self.ship, self.scenario._objects)
-        self.assertIn(self.hydrophone, self.scenario._objects)
+    # Initialize the ScenarioController
+    dimension = 3
+    scenario = ScenarioController(dimension=dimension)
 
-    def test_simulate_movement(self):
-        # Teste para simular movimento
-        self.scenario.add_object(self.ship)
-        self.scenario.add_object(self.hydrophone)
+    # Create and add ships and hydrophones to the scenario
+    for _ in range(5):
+        ship_position = create_random_position(dimension)
+        hydrophone_position = create_random_position(dimension)
+        ship = Ship(ship_position)
+        hydrophone = Hydrophone(hydrophone_position)
+        scenario.add_object(ship)
+        scenario.add_object(hydrophone)
 
-        ship_movements = {self.ship: ([200, 200, -20], 10)}
-        hydrophone_movements = {self.hydrophone: ([150, 150, -15], 5)}
+    # Define movements for ships and hydrophones
+    ship_movements = {
+        ship: (create_random_position(dimension), random.uniform(0, 10)) for ship in scenario.ships
+    }
+    hydrophone_movements = {
+        hydrophone: (create_random_position(dimension), random.uniform(0, 5)) for hydrophone in scenario.hydrophones
+    }
 
-        self.scenario.simulate_movement(ship_movements, hydrophone_movements)
-        # Verifica se os objetos se moveram
-        self.assertEqual(self.ship.position, [200, 200, -20])
-        self.assertEqual(self.hydrophone.position, [150, 150, -15])
+    # Simulate movements
+    scenario.simulate_movement(ship_movements, hydrophone_movements)
 
-    def test_plot_components(self):
-        # Teste para verificar a geração de plotagens
-        self.scenario.add_object(self.ship)
-        self.scenario.add_object(self.hydrophone)
-        
-        # Aqui, você pode testar se os arquivos de plotagem são gerados corretamente
-        # Isso pode envolver verificar se os arquivos são criados no sistema de arquivos
+    # Visualize the scenario
+    scenario.plot_components(dimension=dimension)
+    scenario.animate_movement(ship_movements, hydrophone_movements, filename='scenario_animation.gif')
 
-if __name__ == '__main__':
-    unittest.main()
+    print("Scenario simulation and visualization completed.")
+
+
+if __name__ == "__main__":
+    main()
