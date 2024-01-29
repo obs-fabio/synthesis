@@ -20,10 +20,8 @@ Example of usage:
 """
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 from matplotlib.animation import FuncAnimation
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 import plotly.graph_objects as go
 import os
 from labsonar_synthesis.scenario.ship import Ship
@@ -201,47 +199,30 @@ class ScenarioController:
             raise ValueError("A dimensão deve ser 2 ou 3.")
         if dimension == 3:
             if not os.path.exists(save_path):
-              os.makedirs(save_path)
+                os.makedirs(save_path)
 
-            fig = go.Figure()
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
 
             for obj in self._objects:
                 if isinstance(obj, Ship):
-                    fig.add_trace(go.Scatter3d(
-                        x=[obj.position[0]],
-                        y=[obj.position[1]],
-                        z=[obj.position[2]],
-                        mode='markers+text',
-                        marker=dict(size=5, color='blue'),
-                        name='Navio',
-                        text=[f'Navio ({obj.position[0]}, {obj.position[1]}, {obj.position[2]})'],
-                        textposition='bottom center'
-                    ))
+                    ax.scatter(*obj.position, color='blue', label='Navio')
+                    ax.text(*obj.position, f'Navio ({obj.position[0]}, {obj.position[1]}, {obj.position[2]})')
 
                 elif isinstance(obj, Hydrophone):
-                    fig.add_trace(go.Scatter3d(
-                        x=[obj.position[0]],
-                        y=[obj.position[1]],
-                        z=[obj.position[2]],
-                        mode='markers+text',
-                        marker=dict(size=5, color='red'),
-                        name='Hidrofone',
-                        text=[f'Hidrofone ({obj.position[0]}, {obj.position[1]}, {obj.position[2]})'],
-                        textposition='bottom center'
-                    ))
+                    ax.scatter(*obj.position, color='red', label='Hidrofone')
+                    ax.text(*obj.position, f'Hidrofone ({obj.position[0]}, {obj.position[1]}, {obj.position[2]})')
 
-            fig.update_layout(
-                scene=dict(
-                    xaxis_title='Scenario Width (X)',
-                    yaxis_title='Scenario Length (Y)',
-                    zaxis_title='Depth (Z)',
-                    xaxis=dict(range=[0, self._width]),
-                    yaxis=dict(range=[0, self._depth]),
-                    zaxis=dict(range=[0, self._height], autorange='reversed'),
-                ),
-                title='Component Positions in Scenario'
-            )
+            ax.set_xlabel('Scenario Width (X)')
+            ax.set_ylabel('Scenario Length (Y)')
+            ax.set_zlabel('Depth (Z)')
+            ax.set_xlim([0, self._width])
+            ax.set_ylim([0, self._depth])
+            ax.set_zlim([0, self._height])
+            ax.invert_zaxis()
+
+            plt.title('Component Positions in Scenario')
             filename = f'scenario_plot_{dimension}D.png'
-            fig.write_image(os.path.join(save_path, filename))
-
+            plt.savefig(os.path.join(save_path, filename))
+            plt.close(fig)
         
